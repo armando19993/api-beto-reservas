@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String     @id @default(uuid())
+  publicId          Int        @unique @default(autoincrement())
+  user              String     @unique
+  password          String
+  nombre            String
+  tipo              UserType
+  status            UserStatus
+  imagen            String?
+  fechaNacimiento   DateTime?
+  sedeId            String?
+  sede              Sede?      @relation(fields: [sedeId], references: [id])
+  reservasCreadas   Reserva[]  @relation("ReservaCreador")
+  reservasAsignadas Reserva[]  @relation("ReservaEmpleado")
+  pagos             Pago[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Sede {
+  id            String     @id @default(uuid())
+  publicId      Int        @unique @default(autoincrement())
+  nombre        String
+  status        SedeStatus
+  horarioInicio DateTime
+  horarioFin    DateTime
+  usuarios      User[]
+  reservas      Reserva[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Servicio {
+  id        String     @id @default(uuid())
+  publicId  Int        @unique @default(autoincrement())
+  nombre    String
+  precio    Float
+  tiempo    Int
+  status    SedeStatus
+  reservas  Reserva[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Cliente {
+  id        String    @id @default(uuid())
+  publicId  Int       @unique @default(autoincrement())
+  name      String
+  phone     String
+  reservas  Reserva[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Reserva {
+  id         String   @id @default(uuid())
+  publicId   Int      @unique @default(autoincrement())
+  clienteId  String
+  cliente    Cliente  @relation(fields: [clienteId], references: [id])
+  creadorId  String
+  creador    User     @relation("ReservaCreador", fields: [creadorId], references: [id])
+  empleadoId String
+  empleado   User     @relation("ReservaEmpleado", fields: [empleadoId], references: [id])
+  fecha      DateTime
+  horaInicio DateTime
+  horaFin    DateTime
+  servicioId String
+  servicio   Servicio @relation(fields: [servicioId], references: [id])
+  monto      Float
+  abonado    Float
+  pendiente  Float
+  sedeId     String
+  sede       Sede     @relation(fields: [sedeId], references: [id])
+  pagos      Pago[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Pago {
+  id          String     @id @default(uuid())
+  publicId    Int        @unique @default(autoincrement())
+  usuarioId   String
+  usuario     User       @relation(fields: [usuarioId], references: [id])
+  reservaId   String
+  reserva     Reserva    @relation(fields: [reservaId], references: [id])
+  monto       Float
+  status      PagoStatus
+  comprobante String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum PagoStatus {
+  PENDIENTE
+  COMPLETADO
+  CANCELADO
+}
+
+enum SedeStatus {
+  ACTIVO
+  INACTIVO
+}
+
+enum UserType {
+  ADMIN
+  OPERADOR
+  CLIENTE
+  EMPLEADO
+}
+
+enum UserStatus {
+  ACTIVO
+  SUSPENDIDO
+}
