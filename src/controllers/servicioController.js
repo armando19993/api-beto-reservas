@@ -13,8 +13,8 @@ const createServicio = async (req, res) => {
     const nuevoServicio = await prisma.servicio.create({
       data: {
         nombre,
-        precio,
-        tiempo,
+        precio: parseFloat(precio),
+        tiempo: parseInt(tiempo),
         status, // Asegúrate de incluir el campo status
       },
     });

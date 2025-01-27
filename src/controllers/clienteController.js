@@ -6,7 +6,6 @@ const createCliente = async (req, res) => {
   const { name, phone } = req.body;
 
   try {
-    // Verificar si el cliente ya existe por teléfono
     const clienteExistente = await prisma.cliente.findFirst({
       where: { phone },
     });
@@ -67,7 +66,7 @@ const updateCliente = async (req, res) => {
   const { name, phone } = req.body;
 
   const validate = await prisma.cliente.findFirst({ where: { phone } });
-  if (validate) {
+  if (validate && validate.id !== id) {
     return res.status(400).json({ error: "El teléfono ya está registrado" });
   }
 
